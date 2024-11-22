@@ -3,6 +3,7 @@ from DrissionPage.common import Keys
 import re
 import time
 import random
+import os
 
 def get_veri_code(tab):
     """获取验证码"""
@@ -283,33 +284,35 @@ def sign_up_account(browser, tab):
     return True
 
 if __name__ == "__main__":
+    # 从环境变量中获取配置信息，如果没有设置则使用默认值
+    account = os.environ.get('ACCOUNT', 'default@mailto.plus')
+    password = os.environ.get('PASSWORD', 'default_password')
+    first_name = os.environ.get('FIRST_NAME', 'DefaultFirstName')
+    last_name = os.environ.get('LAST_NAME', 'DefaultLastName')
+
     # 配置信息
     login_url = 'https://authenticator.cursor.sh'
     sign_up_url = 'https://authenticator.cursor.sh/sign-up'
     mail_url = 'https://tempmail.plus'
- 
-    account = 'your_account'                  #必须是 username@mailto.plus 邮箱
-    password = 'your_password'
-    first_name = 'your_firstname'
-    last_name = 'your_lastname'
 
     # 浏览器配置
     co = ChromiumOptions()
     co.add_extension("turnstilePatch")
-    co.headless()                            #无头模式
-    co.set_user_agent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.92 Safari/537.36')
+    co.headless()  # 无头模式
+    co.set_user_agent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.92 Safari/537.36')
     co.set_pref('credentials_enable_service', False)
-    co.set_argument('--hide-crash-restore-bubble') 
+    co.set_argument('--hide-crash-restore-bubble')
     co.auto_port()
-    # co.set_argument('--no-sandbox')        # 无沙盒模式     用于linux
-    # co.set_argument('--headless=new')      #无界面系统启动参数   用于linux
+    co.set_argument('--no-sandbox')        # 无沙盒模式     用于linux
+    co.set_argument('--headless=new')      #无界面系统启动参数   用于linux
     # co.set_proxy('127.0.0.1:10809')        #设置代理
 
     browser = Chromium(co)
     tab = browser.latest_tab
     tab.run_js("try { turnstile.reset() } catch(e) { }")
     tab.get(login_url)
-    
+
     print("开始执行删除和注册流程")
     # 执行删除和注册流程
     if delete_account(browser, tab):
@@ -323,4 +326,4 @@ if __name__ == "__main__":
         print("账户删除失败")
 
     print("脚本执行完毕")
-    browser.quit()    
+    browser.quit()
